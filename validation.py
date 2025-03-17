@@ -1,8 +1,8 @@
-from transformers import AutoModel, AutoTokenizer
+from transformers import AutoTokenizer, AutoConfig
 import torch
 import os
 import numpy as np
-from segvol.model_segvol_single import build_binary_cube_dict
+from segvol.model_segvol_single import build_binary_cube_dict, SegVolModel
 from tqdm import tqdm
 import json
 
@@ -91,9 +91,10 @@ if __name__ == '__main__':
     model_dir = './segvol'
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
     VALIDATION_MODE = True
-    ckpt_path = '/hpc2hdd/home/ydu709/code/FM3D/ckpts_fm3d_resize/epoch_2000_loss_0.2232.pth'
+    ckpt_path = './epoch_2000_loss_0.2232.pth'
     clip_tokenizer = AutoTokenizer.from_pretrained(model_dir)
-    model_val = AutoModel.from_pretrained(model_dir, trust_remote_code=True, test_mode=True)
+    config = AutoConfig.from_pretrained(model_dir, trust_remote_code=True)
+    model_val = SegVolModel(config)
     model_val.model.text_encoder.tokenizer = clip_tokenizer
     processor = model_val.processor
     checkpoint = torch.load(ckpt_path, map_location=device)
