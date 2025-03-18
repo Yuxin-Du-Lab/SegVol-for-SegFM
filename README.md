@@ -14,9 +14,9 @@ pip install transformers==4.18.0
 ```
 
 ### Validation
-1. Download our preliminary [checkpoint]() first and set the `ckpt_path` var in validation.py.
+1. Download our preliminary [**checkpoint**]() first and set the `ckpt_path` var in validation.py.
 
-2. Download [SegFM](https://www.codabench.org/competitions/5263/) validation set and build val_samples.json file to index validation npz files:
+2. Download [SegFM](https://www.codabench.org/competitions/5263/) validation set and build **val_samples.json** file to index validation npz files like this:
 ```
 [
 "/path/to/xxx.npz",
