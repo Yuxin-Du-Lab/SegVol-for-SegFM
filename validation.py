@@ -60,8 +60,10 @@ def validation(model_val, val_dataloader, processor):
         data_item['image'].unsqueeze(0).to(device), data_item['label'].unsqueeze(0).to(device), data_item['zoom_out_image'].unsqueeze(0).to(device), data_item['zoom_out_label'].unsqueeze(0).to(device)
         
         for cls_idx in range(category_num):
-            bbox_prompt = processor.bbox_prompt_b(data_item['zoom_out_label'][0][cls_idx], device=device) 
+            
             cube_boxes = data_item['cube_boxes'][cls_idx].unsqueeze(0).unsqueeze(0)
+            # bbox_prompt = processor.bbox_prompt_b(data_item['zoom_out_label'][0][cls_idx], device=device) 
+            bbox_prompt = processor.bbox_prompt_b(data_item['zoom_out_cube_boxes'][cls_idx], device=device) 
 
             with torch.no_grad():
                 logits_mask = model_val.forward_test(

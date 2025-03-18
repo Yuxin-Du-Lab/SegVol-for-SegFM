@@ -217,7 +217,7 @@ class SegVolProcessor():
                 transforms.ToTensord(keys=["image", "label", "cube_boxes"]),
             ]
         )
-        self.zoom_out_transform = transforms.Resized(keys=["image", "label"], spatial_size=spatial_size, mode='nearest')
+        self.zoom_out_transform = transforms.Resized(keys=["image", "label", "cube_boxes"], spatial_size=spatial_size, mode='nearest')
         self.transform4train = transforms.Compose(
         [
             # transforms.AddChanneld(keys=["image"]),
@@ -368,6 +368,7 @@ class SegVolProcessor():
         item_zoom_out = self.zoom_out_transform(item)
         item['zoom_out_image'] = item_zoom_out['image']
         item['zoom_out_label'] = item_zoom_out['label']
+        item['zoom_out_cube_boxes'] = item_zoom_out['cube_boxes']
         return item
 
     def point_prompt_b(self, label_single_resize, num_positive_extra=4, num_negative_extra=4, device='cpu'):
