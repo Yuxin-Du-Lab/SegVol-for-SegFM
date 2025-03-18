@@ -14,7 +14,7 @@ pip install transformers==4.18.0
 ```
 
 ### Validation
-1. Download our preliminary [**checkpoint**](https://drive.google.com/file/d/1dgM5slT5kDV3D_6k_vGpGqU5yB1nTwCL/view?usp=drive_link) first and set the `ckpt_path` var in validation.py.
+1. Download our preliminary [**checkpoint**](https://drive.google.com/file/d/1dgM5slT5kDV3D_6k_vGpGqU5yB1nTwCL/view?usp=drive_link) first and set the `ckpt_path` var in validation.py. (Trained on 10% dataset and support box prompt only)
 
 2. Download [SegFM](https://www.codabench.org/competitions/5263/) validation set and build **val_samples.json** file to index validation npz files like this:
 ```
