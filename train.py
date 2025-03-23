@@ -22,11 +22,23 @@ def load_checkpoint(checkpoint_path, device, model, optimizer, scheduler, num_ep
         return 0, float('inf')
     print(f'load checkpoint from {checkpoint_path}')
     checkpoint = torch.load(checkpoint_path, map_location=device)
-    model.module.load_state_dict(checkpoint['model_state_dict'])
-    if local_rank == 0:
-        print(f"Resuming training from epoch {checkpoint['epoch']}")
+    if 'model_state_dict' in checkpoint.keys():
+        model.module.load_state_dict(checkpoint['model_state_dict'])
+        if local_rank == 0 and 'model_state_dict' in checkpoint.keys():
+            print(f"Resuming training from epoch {checkpoint['epoch']}")
+        
+        return checkpoint['epoch'] + 1, checkpoint['loss']
+    else:
+        # for SegVol_v1.pth
+        model_dict = {}
+        for k, v in list(checkpoint['model'].items()):
+            new_k = k.replace('module.', 'model.')
+            model_dict[new_k] = v
+        model.module.load_state_dict(model_dict)
+        print(f"Resuming training from SegVol_v1.pth")
+        return 0, float('inf')
     
-    return checkpoint['epoch'] + 1, checkpoint['loss']
+    
 
 def setup_ddp():
     # Initialize process group
@@ -95,7 +107,15 @@ def val_model(local_rank, model_dir, ckpt_path):
 
     device = torch.device(f"cuda:{local_rank}")
     checkpoint = torch.load(ckpt_path, map_location=device)
-    model_val.load_state_dict(checkpoint['model_state_dict'])
+    if 'model_state_dict' in checkpoint.keys():
+        model_val.load_state_dict(checkpoint['model_state_dict'])
+    else:
+        # for SegVol_v1.pth
+        model_dict = {}
+        for k, v in list(checkpoint['model'].items()):
+            new_k = k.replace('module.', 'model.')
+            model_dict[new_k] = v
+        model_val.load_state_dict(model_dict)
     model_val.eval()
     model_val.to(device)
 
@@ -156,6 +176,7 @@ if __name__ == '__main__':
     model_dir = './segvol'
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
     resume_checkpoint = './epoch_2000_loss_0.2232.pth'
+    # resume_checkpoint = './SegVol_v1.pth'
     save_dir = './ckpts_fm3d_segvol'
     os.makedirs(save_dir, exist_ok=True)
     train_root_path = '/path/to/3D_train_npz_random_10percent_16G'
