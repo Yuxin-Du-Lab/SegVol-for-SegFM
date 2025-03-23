@@ -3,7 +3,7 @@ This repo is the SegFM version of SegVol for [SegFM](https://www.codabench.org/c
 SegFM is CVPR 2025: Foundation Models for Interactive 3D Biomedical Image Segmentation.
 
 Origin repo of SegVol: https://github.com/BAAI-DCAI/SegVol
-## Get Start with source code
+## Get start with source code
 ### Requirements
 The [pytorch v1.13.1](https://pytorch.org/get-started/previous-versions/) (or a higher version) is needed first. Following install key requirements using commands:
 
@@ -11,6 +11,11 @@ The [pytorch v1.13.1](https://pytorch.org/get-started/previous-versions/) (or a 
 pip install 'monai[all]==0.9.0'
 pip install einops==0.6.1
 pip install transformers==4.18.0
+```
+OR
+
+```
+conda env create -f environment.yml
 ```
 
 ### Validation
@@ -50,3 +55,9 @@ python validation.py
 torchrun --nproc_per_node=N train.py
 ```
 
+## Evaluation with Docker Image
+Download and load the [docker image (FM3D10% 2000 epochs SegVol)](), place all test cts in `inputs`, and run the command:
+```
+docker container run --gpus "device=0" -m 8G --name segvol --rm -v $PWD/inputs/:/workspace/inputs/ -v $PWD/outputs/:/workspace/outputs/ segvol:e2000
+```
+The prediction results will be saved in `outputs`
