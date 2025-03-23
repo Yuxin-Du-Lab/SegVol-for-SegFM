@@ -175,7 +175,7 @@ def mask3D_to_bbox(gt3D, bbox_shift=None):
     b_dict = {}
     z_indices, y_indices, x_indices = torch.where(gt3D > 0)
     if len(z_indices) == 0:
-        print('Fail to detect foreground! mask3D_to_bbox')
+        # print('Fail to detect foreground! mask3D_to_bbox')
         return torch.tensor([-1,-1,-1,-1,-1,-1])
         
     z_min, z_max = z_indices.min(), z_indices.max()

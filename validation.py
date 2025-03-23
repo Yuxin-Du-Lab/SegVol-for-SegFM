@@ -9,11 +9,10 @@ import json
 device_id = 0
 device = torch.device(f"cuda:{device_id}")
 
-class SegDataset(torch.utils.data.Dataset):
-    def __init__(self, file_paths, preprocessor, test_mode=False):
+class SegDatasetTest(torch.utils.data.Dataset):
+    def __init__(self, file_paths, preprocessor):
         self.file_paths = file_paths
         self.preprocessor = preprocessor
-        self.test_mode = test_mode
         self.epoch = 0
     
     def __len__(self):
@@ -28,22 +27,19 @@ class SegDataset(torch.utils.data.Dataset):
         imgs = npz['imgs']
         gts = npz['gts']
         
+        imgs, gts = self.preprocessor.preprocess_ct_gt(imgs, gts)   # (1, H, W, D), (N, H, W, D)
+        boxes = npz['boxes'] # a list of bounding box prompts
+        cube_boxes = []
+        for std_box in boxes:
+            binary_cube = build_binary_cube_dict(std_box, imgs.shape[1:])
+            cube_boxes.append(binary_cube)
+        cube_boxes = torch.stack(cube_boxes, dim=0)
+        assert cube_boxes.shape == gts.shape, f'{cube_boxes.shape} != {gts.shape}'
 
-        if self.test_mode:
-            imgs, gts = self.preprocessor.preprocess_ct_gt(imgs, gts)   # (1, H, W, D), (N, H, W, D)
-            boxes = npz['boxes'] # a list of bounding box prompts
-            cube_boxes = []
-            for std_box in boxes:
-                binary_cube = build_binary_cube_dict(std_box, imgs.shape[1:])
-                cube_boxes.append(binary_cube)
-            cube_boxes = torch.stack(cube_boxes, dim=0)
-            assert cube_boxes.shape == gts.shape, f'{cube_boxes.shape} != {gts.shape}'
+        zoom_item = self.preprocessor.zoom_transform(imgs, gts, cube_boxes)
+        zoom_item['file_path'] = file_path
+        return zoom_item
 
-            zoom_item = self.preprocessor.zoom_transform(imgs, gts, cube_boxes)
-            zoom_item['file_path'] = file_path
-            return zoom_item
-        else:
-            raise ValueError('test_mode must be True')
 
 
 def validation(model_val, val_dataloader, processor):        
@@ -88,6 +84,7 @@ def validation(model_val, val_dataloader, processor):
     avg_bbox_dice = total_bbox_dice / total_samples
     
     print(f'Average BBox Dice: {avg_bbox_dice:.4f}')
+    return avg_bbox_dice
 
 if __name__ == '__main__':
     model_dir = './segvol'
@@ -106,7 +103,7 @@ if __name__ == '__main__':
     with open('val_samples.json', 'r') as f:
         val_file_paths = json.load(f)
     
-    val_dataset = SegDataset(val_file_paths, processor, test_mode=True)
+    val_dataset = SegDatasetTest(val_file_paths, processor)
     print('val dataset size:', len(val_dataset))
     val_dataloader = torch.utils.data.DataLoader(
         val_dataset,
