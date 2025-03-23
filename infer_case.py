@@ -79,15 +79,14 @@ if __name__ == '__main__':
     model_val.eval()
     model_val.to(device)
 
-    npz_file = glob("inputs/*.npz")[0]
+    
     out_dir = "./outputs"
     os.makedirs(out_dir, exist_ok=True)
 
-    data_item = load_item(npz_file, processor)
-    # dict_keys(['image', 'label', 'cube_boxes', 'foreground_start_coord', 'foreground_end_coord', 
-    # 'image_transforms', 'label_transforms', 'cube_boxes_transforms', 'zoom_out_image', 'zoom_out_label', 
-    # 'zoom_out_cube_boxes', 'file_path'])
-    final_preds = infer_case(model_val, data_item, processor, device)
-    output_path = os.path.join(out_dir, os.path.basename(npz_file))
-    np.savez_compressed(output_path, segs=final_preds)
+    npz_files = glob("inputs/*.npz")
+    for npz_file in npz_files:
+        data_item = load_item(npz_file, processor)
+        final_preds = infer_case(model_val, data_item, processor, device)
+        output_path = os.path.join(out_dir, os.path.basename(npz_file))
+        np.savez_compressed(output_path, segs=final_preds)
     print('done')
