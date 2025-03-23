@@ -42,7 +42,7 @@ class SegDatasetTest(torch.utils.data.Dataset):
 
 
 
-def validation(model_val, val_dataloader, processor):        
+def validation(model_val, val_dataloader, processor):  
 
     total_bbox_dice = 0.0
     total_samples = 0
@@ -89,7 +89,6 @@ def validation(model_val, val_dataloader, processor):
 if __name__ == '__main__':
     model_dir = './segvol'
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
-    VALIDATION_MODE = True
     ckpt_path = './epoch_2000_loss_0.2232.pth'
     clip_tokenizer = AutoTokenizer.from_pretrained(model_dir)
     config = AutoConfig.from_pretrained(model_dir, trust_remote_code=True)
@@ -100,6 +99,7 @@ if __name__ == '__main__':
     model_val.load_state_dict(checkpoint['model_state_dict'])
     model_val.eval()
     model_val.to(device)
+
     with open('val_samples.json', 'r') as f:
         val_file_paths = json.load(f)
     

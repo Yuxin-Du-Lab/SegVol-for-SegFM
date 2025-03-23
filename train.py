@@ -173,13 +173,19 @@ def train_one_epoch(model, train_dataloader, optimizer, epoch):
 
 if __name__ == '__main__':
     # set base parameters
-    model_dir = './segvol'
-    os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+    batch_size = 4
+    num_workers = 4
+    num_epochs = 3000
+    initial_lr = 1e-5
+    eta_min = 1e-6
+    train_root_path = '/hpc2hdd/home/ydu709/data/3D_train_npz_random_10percent_16G'
     resume_checkpoint = './epoch_2000_loss_0.2232.pth'
     # resume_checkpoint = './SegVol_v1.pth'
     save_dir = './ckpts_fm3d_segvol'
+    ###########################
+    model_dir = './segvol'
+    os.environ['TOKENIZERS_PARALLELISM'] = 'false'
     os.makedirs(save_dir, exist_ok=True)
-    train_root_path = '/path/to/3D_train_npz_random_10percent_16G'
     train_file_paths = glob.glob(os.path.join(train_root_path, '**', '*.npz'), recursive=True)
 
     # load model
@@ -205,9 +211,6 @@ if __name__ == '__main__':
 
     # Set optimizer
     start_epoch = 0
-    initial_lr = 1e-5
-    num_epochs = 3000
-    eta_min = 1e-6
     optimizer = torch.optim.AdamW(model.parameters(), lr=initial_lr, weight_decay=1e-5)
     # set your own scheduler
     # ...
@@ -222,9 +225,9 @@ if __name__ == '__main__':
     train_sampler = DistributedSampler(train_dataset)
     train_dataloader = torch.utils.data.DataLoader(
         train_dataset,
-        batch_size=8,
+        batch_size=batch_size,
         shuffle=False,  # 使用DistributedSampler时需要设为False
-        num_workers=8,
+        num_workers=num_workers,
         collate_fn=collate_fn,
         sampler=train_sampler,
         pin_memory=True
