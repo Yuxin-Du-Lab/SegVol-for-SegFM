@@ -35,7 +35,7 @@ conda env create -f environment.yml
 python validation.py
 ```
 
-### Train
+### Training
 #### GPU memory requirement for finetuning: 24GB for 4 batch size
 1. **Train based on the FM3D10% 2000 epochs SegVol checkpoint:** Download our preliminary [**checkpoint** (2000 epochs ckpt)](https://drive.google.com/file/d/1dgM5slT5kDV3D_6k_vGpGqU5yB1nTwCL/view?usp=drive_link) first and set the `resume_checkpoint` var in train.py. (Trained on 10% dataset and support box prompt only)
 
