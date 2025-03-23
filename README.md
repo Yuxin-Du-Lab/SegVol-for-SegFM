@@ -3,7 +3,7 @@ This repo is the SegFM version of SegVol for [SegFM](https://www.codabench.org/c
 SegFM is CVPR 2025: Foundation Models for Interactive 3D Biomedical Image Segmentation.
 
 Origin repo of SegVol: https://github.com/BAAI-DCAI/SegVol
-## Get Start
+## Get start with source code
 ### Requirements
 The [pytorch v1.13.1](https://pytorch.org/get-started/previous-versions/) (or a higher version) is needed first. Following install key requirements using commands:
 
@@ -12,8 +12,13 @@ pip install 'monai[all]==0.9.0'
 pip install einops==0.6.1
 pip install transformers==4.18.0
 ```
+OR
 
-### Validation with source code
+```
+conda env create -f environment.yml
+```
+
+### Validation
 1. Download our preliminary [**checkpoint** (2000 epochs ckpt)](https://drive.google.com/file/d/1dgM5slT5kDV3D_6k_vGpGqU5yB1nTwCL/view?usp=drive_link) first and set the `ckpt_path` var in validation.py. (Trained on 10% dataset and support box prompt only)
    
 
@@ -30,7 +35,7 @@ pip install transformers==4.18.0
 python validation.py
 ```
 
-### Train with source code
+### Train
 #### GPU memory requirement for finetuning: 24GB for 4 batch size
 1. **Train based on the FM3D10% 2000 epochs SegVol checkpoint:** Download our preliminary [**checkpoint** (2000 epochs ckpt)](https://drive.google.com/file/d/1dgM5slT5kDV3D_6k_vGpGqU5yB1nTwCL/view?usp=drive_link) first and set the `resume_checkpoint` var in train.py. (Trained on 10% dataset and support box prompt only)
 
@@ -50,3 +55,9 @@ python validation.py
 torchrun --nproc_per_node=N train.py
 ```
 
+## Evaluation with Docker Image
+Download and load the [docker image (FM3D10% 2000 epochs SegVol)](), place all test cts in `inputs`, and run the command:
+```
+docker container run --gpus "device=0" -m 8G --name segvol --rm -v $PWD/inputs/:/workspace/inputs/ -v $PWD/outputs/:/workspace/outputs/ segvol:e2000
+```
+The prediction results will be saved in `outputs`
