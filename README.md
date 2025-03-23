@@ -3,7 +3,7 @@ This repo is the SegFM version of SegVol for [SegFM](https://www.codabench.org/c
 SegFM is CVPR 2025: Foundation Models for Interactive 3D Biomedical Image Segmentation.
 
 Origin repo of SegVol: https://github.com/BAAI-DCAI/SegVol
-## Get Start
+## Get Start with source code
 ### Requirements
 The [pytorch v1.13.1](https://pytorch.org/get-started/previous-versions/) (or a higher version) is needed first. Following install key requirements using commands:
 
@@ -13,7 +13,7 @@ pip install einops==0.6.1
 pip install transformers==4.18.0
 ```
 
-### Validation with source code
+### Validation
 1. Download our preliminary [**checkpoint** (2000 epochs ckpt)](https://drive.google.com/file/d/1dgM5slT5kDV3D_6k_vGpGqU5yB1nTwCL/view?usp=drive_link) first and set the `ckpt_path` var in validation.py. (Trained on 10% dataset and support box prompt only)
    
 
@@ -30,7 +30,7 @@ pip install transformers==4.18.0
 python validation.py
 ```
 
-### Train with source code
+### Train
 #### GPU memory requirement for finetuning: 24GB for 4 batch size
 1. **Train based on the FM3D10% 2000 epochs SegVol checkpoint:** Download our preliminary [**checkpoint** (2000 epochs ckpt)](https://drive.google.com/file/d/1dgM5slT5kDV3D_6k_vGpGqU5yB1nTwCL/view?usp=drive_link) first and set the `resume_checkpoint` var in train.py. (Trained on 10% dataset and support box prompt only)
 
