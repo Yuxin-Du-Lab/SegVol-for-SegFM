@@ -58,7 +58,7 @@ torchrun --nproc_per_node=N train.py
 ```
 
 ## Evaluation with Docker Image
-Download and load the [docker image (FM3D10% 2000 epochs SegVol)](https://drive.google.com/file/d/1tYhALL7VVVyq27AqfXpyyTLDxeIevbup/view?usp=sharing), place all test cts in `inputs`, and run the command:
+Download and load the [docker image (FM3D10% 2000 epochs SegVol)](https://drive.google.com/file/d/1tYhALL7VVVyq27AqfXpyyTLDxeIevbup/view?usp=sharing), place all test cts.npz in `inputs`, and run the command:
 ```
 docker container run --gpus "device=0" -m 8G --name segvol --rm -v $PWD/inputs/:/workspace/inputs/ -v $PWD/outputs/:/workspace/outputs/ segvol:e2000
 ```
