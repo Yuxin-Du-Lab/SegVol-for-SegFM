@@ -217,7 +217,15 @@ class SegVolProcessor():
                 transforms.ToTensord(keys=["image", "label", "cube_boxes"]),
             ]
         )
+        self.transform4test_case = transforms.Compose(
+            [
+                MinMaxNormalization(),
+                transforms.CropForegroundd(keys=["image", "cube_boxes"], source_key="image"),
+                transforms.ToTensord(keys=["image", "cube_boxes"]),
+            ]
+        )
         self.zoom_out_transform = transforms.Resized(keys=["image", "label", "cube_boxes"], spatial_size=spatial_size, mode='nearest')
+        self.zoom_out_transform_case = transforms.Resized(keys=["image", "cube_boxes"], spatial_size=spatial_size, mode='nearest')
         self.transform4train = transforms.Compose(
         [
             # transforms.AddChanneld(keys=["image"]),
@@ -300,6 +308,17 @@ class SegVolProcessor():
         # transform
         return item['image'], item['label']
     
+    def preprocess_ct_case(self, imgs):
+        item = {}
+        # generate ct_voxel_ndarray
+        ct_voxel_ndarray = imgs
+        ct_voxel_ndarray = np.array(ct_voxel_ndarray, dtype=np.float32)
+        ct_shape = ct_voxel_ndarray.shape
+        ct_voxel_ndarray = np.expand_dims(ct_voxel_ndarray, axis=0)
+        ct_voxel_ndarray = self.ForegroundNorm(ct_voxel_ndarray)
+        item['image'] = ct_voxel_ndarray
+        return item['image']
+    
     # ct_path is path for a ct scan file with nii.gz format
     # gt_path is path for a ground truth file with nii.gz format
     def preprocess_ct_gt_old(self, ct_path, gt_path, category):
@@ -368,6 +387,17 @@ class SegVolProcessor():
         item_zoom_out = self.zoom_out_transform(item)
         item['zoom_out_image'] = item_zoom_out['image']
         item['zoom_out_label'] = item_zoom_out['label']
+        item['zoom_out_cube_boxes'] = item_zoom_out['cube_boxes']
+        return item
+    
+    def zoom_transform_case(self, ct_npy, cube_boxes):
+        item = {
+            'image': ct_npy,
+            'cube_boxes': cube_boxes
+        }
+        item = self.transform4test_case(item)
+        item_zoom_out = self.zoom_out_transform_case(item)
+        item['zoom_out_image'] = item_zoom_out['image']
         item['zoom_out_cube_boxes'] = item_zoom_out['cube_boxes']
         return item
 

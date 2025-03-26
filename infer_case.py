@@ -11,20 +11,21 @@ def load_item(npz_file, preprocessor):
     file_path = npz_file
     npz = np.load(file_path, allow_pickle=True)
     imgs = npz['imgs']
-    gts = npz['gts']
+    # gts = npz['gts']
     
-    imgs, gts = preprocessor.preprocess_ct_gt(imgs, gts)   # (1, H, W, D), (N, H, W, D)
+    imgs = preprocessor.preprocess_ct_case(imgs)   # (1, H, W, D)
     boxes = npz['boxes'] # a list of bounding box prompts
     cube_boxes = []
     for std_box in boxes:
         binary_cube = build_binary_cube_dict(std_box, imgs.shape[1:])
         cube_boxes.append(binary_cube)
     cube_boxes = torch.stack(cube_boxes, dim=0)
-    assert cube_boxes.shape == gts.shape, f'{cube_boxes.shape} != {gts.shape}'
+    assert cube_boxes.shape == imgs.shape, f'{cube_boxes.shape} != {imgs.shape}'
 
-    zoom_item = preprocessor.zoom_transform(imgs, gts, cube_boxes)
+    zoom_item = preprocessor.zoom_transform_case(imgs, cube_boxes)
     zoom_item['file_path'] = file_path
-    zoom_item['gts_original'] = torch.from_numpy(npz['gts'])
+    zoom_item['img_original'] = torch.from_numpy(npz['imgs'])
+    zoom_item['std_boxes'] = torch.from_numpy(npz['boxes'])
     return zoom_item
 
 def backfill_foreground_preds(ct_shape, logits_mask, start_coord, end_coord):
@@ -40,9 +41,11 @@ def infer_case(model_val, data_item, processor, device):
     data_item['image'].unsqueeze(0).to(device), data_item['label'].unsqueeze(0).to(device), data_item['zoom_out_image'].unsqueeze(0).to(device), data_item['zoom_out_label'].unsqueeze(0).to(device)
     start_coord, end_coord = data_item['foreground_start_coord'], data_item['foreground_end_coord']
 
-    gts = data_item['gts_original']
+    img_original = data_item['img_original']
+    print(data_item['std_boxes'])
+    exit()
     category_ids = torch.unique(gts)
-    final_preds = torch.zeros_like(gts)
+    final_preds = torch.zeros_like(img_original)
 
     for category_id in category_ids:
         if category_id == 0:
