@@ -20,12 +20,11 @@ def load_item(npz_file, preprocessor):
         binary_cube = build_binary_cube_dict(std_box, imgs.shape[1:])
         cube_boxes.append(binary_cube)
     cube_boxes = torch.stack(cube_boxes, dim=0)
-    assert cube_boxes.shape == imgs.shape, f'{cube_boxes.shape} != {imgs.shape}'
+    assert cube_boxes.shape[1:] == imgs.shape[1:], f'{cube_boxes.shape} != {imgs.shape}'
 
     zoom_item = preprocessor.zoom_transform_case(imgs, cube_boxes)
     zoom_item['file_path'] = file_path
     zoom_item['img_original'] = torch.from_numpy(npz['imgs'])
-    zoom_item['std_boxes'] = torch.from_numpy(npz['boxes'])
     return zoom_item
 
 def backfill_foreground_preds(ct_shape, logits_mask, start_coord, end_coord):
@@ -37,19 +36,17 @@ def backfill_foreground_preds(ct_shape, logits_mask, start_coord, end_coord):
     return binary_preds
 
 def infer_case(model_val, data_item, processor, device):
-    data_item['image'], data_item['label'], data_item['zoom_out_image'], data_item['zoom_out_label'] = \
-    data_item['image'].unsqueeze(0).to(device), data_item['label'].unsqueeze(0).to(device), data_item['zoom_out_image'].unsqueeze(0).to(device), data_item['zoom_out_label'].unsqueeze(0).to(device)
+    data_item['image'], data_item['zoom_out_image'] = \
+    data_item['image'].unsqueeze(0).to(device), data_item['zoom_out_image'].unsqueeze(0).to(device)
     start_coord, end_coord = data_item['foreground_start_coord'], data_item['foreground_end_coord']
 
     img_original = data_item['img_original']
-    print(data_item['std_boxes'])
-    exit()
-    category_ids = torch.unique(gts)
+    category_n = data_item['cube_boxes'].shape[0]
+    category_ids = torch.arange(category_n) + 1
+    category_ids = list(category_ids)
     final_preds = torch.zeros_like(img_original)
 
     for category_id in category_ids:
-        if category_id == 0:
-            continue
         cls_idx = (category_id - 1).item()
         cube_boxes = data_item['cube_boxes'][cls_idx].unsqueeze(0).unsqueeze(0)
         bbox_prompt = processor.bbox_prompt_b(data_item['zoom_out_cube_boxes'][cls_idx], device=device) 
@@ -60,7 +57,7 @@ def infer_case(model_val, data_item, processor, device):
                 bbox_prompt_group=[bbox_prompt, cube_boxes],
                 use_zoom=True
             )
-        binary_preds = backfill_foreground_preds(gts.shape, logits_mask, start_coord, end_coord)
+        binary_preds = backfill_foreground_preds(img_original.shape, logits_mask, start_coord, end_coord)
         final_preds[binary_preds == 1] = category_id
     
         # clear cache
