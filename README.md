@@ -3,6 +3,8 @@ This repo is the SegFM version of SegVol for [SegFM](https://www.codabench.org/c
 SegFM is CVPR 2025: Foundation Models for Interactive 3D Biomedical Image Segmentation.
 
 Origin repo of SegVol: https://github.com/BAAI-DCAI/SegVol
+
+CVPR Descriptive Video: [CVPR25SegFM Webinar: 05 SegVol | Yuxin Du](https://youtu.be/Kt-2XfZFeA8?si=WJ95IPsEjgVc59vv)]
 ### Inference Map
 ![segvol pre](https://github.com/user-attachments/assets/76be187f-6379-45ee-9249-b3d416cbfdac)
 ### Training Map
